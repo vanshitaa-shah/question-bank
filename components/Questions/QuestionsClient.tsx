@@ -178,11 +178,25 @@ export default function QuestionsClient({
         const updatedQuestions = await addQuestion(topicId, questionData);
         // Convert readonly array to mutable array for state
         setQuestions([...updatedQuestions]);
-        setFilteredQuestions([...updatedQuestions]); // Reset filters after adding
+        
+        // Refresh filters if they are active, otherwise set to all questions
+        const hasActiveFilters = searchQuery.trim() !== "" || difficultyFilter !== "all";
+        if (hasActiveFilters) {
+          // Re-apply current filters to include the new question if it matches
+          handleFilterChange(searchQuery, difficultyFilter);
+        } else {
+          setFilteredQuestions([...updatedQuestions]);
+        }
       } catch (err) {
         setError((err as Error).message || "Failed to add question");
-        // Revert optimistic update on error
-        setQuestions(initialQuestions);
+        // Revert optimistic update on error by refreshing the current view
+        setQuestions([...questions]);
+        const hasActiveFilters = searchQuery.trim() !== "" || difficultyFilter !== "all";
+        if (hasActiveFilters) {
+          handleFilterChange(searchQuery, difficultyFilter);
+        } else {
+          setFilteredQuestions([...questions]);
+        }
       }
     });
   };
@@ -207,13 +221,28 @@ export default function QuestionsClient({
         setQuestions(prev => 
           prev.map(q => q._id === questionId ? updatedQuestion : q)
         );
-        setFilteredQuestions(prev => 
-          prev.map(q => q._id === questionId ? updatedQuestion : q)
-        );
+        
+        // Refresh filters to ensure the updated question is properly filtered
+        const hasActiveFilters = searchQuery.trim() !== "" || difficultyFilter !== "all";
+        if (hasActiveFilters) {
+          handleFilterChange(searchQuery, difficultyFilter);
+        } else {
+          setFilteredQuestions(prev => 
+            prev.map(q => q._id === questionId ? updatedQuestion : q)
+          );
+        }
       } catch (err) {
         setError((err as Error).message || "Failed to update question");
         // Revert optimistic update on error
-        setQuestions(questions);
+        setQuestions([...questions]);
+        
+        // Refresh filters to ensure consistency
+        const hasActiveFilters = searchQuery.trim() !== "" || difficultyFilter !== "all";
+        if (hasActiveFilters) {
+          handleFilterChange(searchQuery, difficultyFilter);
+        } else {
+          setFilteredQuestions([...questions]);
+        }
       }
     });
   };
@@ -250,8 +279,9 @@ export default function QuestionsClient({
     });
   };
 
-  // Display current questions or optimistic questions
-  const displayQuestions = filteredQuestions.length ? filteredQuestions : optimisticQuestions;
+  // Display logic: Show filtered results when filters are active, otherwise show optimistic questions
+  const hasActiveFilters = searchQuery.trim() !== "" || difficultyFilter !== "all";
+  const displayQuestions = hasActiveFilters ? filteredQuestions : optimisticQuestions;
   const isLoading = isPending || addPending || updatePending;
 
   return (

@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   // Next.js 15: Enhanced experimental features (only stable ones)
   experimental: {
     // React 19 support
-    reactCompiler: false, // Disable for now as it's not stable
+    reactCompiler: true,
   },
 
   // Enhanced TypeScript configuration

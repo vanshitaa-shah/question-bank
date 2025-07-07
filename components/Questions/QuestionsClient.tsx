@@ -138,7 +138,6 @@ export default function QuestionsClient({
           newDifficultyFilter,
           100 // Increased limit for better UX
         );
-        console.log("Filtered questions:", filtered);
         
         // Convert readonly array to mutable array for state
         setFilteredQuestions([...filtered]);

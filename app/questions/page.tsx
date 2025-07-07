@@ -22,8 +22,6 @@ export default async function QuestionsPage({
   const params = await searchParams;
   const topicId = params.topicId || "";
 
-  console.log("Topic ID:", topicId);
-
   if (!topicId) {
     return <div className="p-6">No topic selected. Please select a topic.</div>;
   }
@@ -32,12 +30,9 @@ export default async function QuestionsPage({
   await connectDB();
   const questions = await getQuestions(topicId);
 
-  console.log("Fetched questions:", questions);
-
   // Get topic name
   const topic = await Topic.findById(topicId);
   const topicName = topic ? topic.name : "Unknown Topic";
-  console.log("Topic Name:", topicName);
 
   return (
     <QuestionsClient

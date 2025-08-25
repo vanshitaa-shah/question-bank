@@ -17,6 +17,7 @@ import QuestionList from "./QuestionListProps";
 import QuestionModal from "@/components/QuestionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PageHeader from "@/components/PageHeader";
+import { CenteredLoader, InlineLoader } from "@/components/ui/loader";
 
 interface QuestionsClientProps {
   readonly initialQuestions: Question[];
@@ -313,7 +314,7 @@ export default function QuestionsClient({
       
       {/* Scrollable content with loading state */}
       <div className="flex-1 overflow-auto p-6 pt-4">
-        <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading questions...</div>}>
+        <Suspense fallback={<CenteredLoader text="Loading questions..." />}>
           <QuestionList
             filteredQuestions={displayQuestions}
             questions={questions}
@@ -325,10 +326,7 @@ export default function QuestionsClient({
         
         {isLoading && (
           <div className="text-center py-4">
-            <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-              <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-              Processing...
-            </div>
+            <InlineLoader text="Processing..." />
           </div>
         )}
       </div>

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import React, { useState, useEffect } from 'react';
 import SubmitButton from '../SubmitButton';
 import { createTopic } from '@/app/actions/topicActions';
+import { InlineLoader } from '@/components/ui/loader';
 
 interface AddOrEditTopicModalProps {
   open: boolean;
@@ -73,7 +74,7 @@ export function AddOrEditTopicModal({
             autoFocus
           />
           <SubmitButton type="submit" disabled={loading}>
-            {loading ? (mode === 'edit' ? 'Saving...' : 'Adding...') : mode === 'edit' ? 'Save Changes' : 'Add'}
+            {loading ? <InlineLoader text={mode === 'edit' ? 'Saving...' : 'Adding...'} /> : mode === 'edit' ? 'Save Changes' : 'Add'}
           </SubmitButton>
           {error && <p className="text-sm text-red-500">{error}</p>}
         </form>

@@ -1,6 +1,7 @@
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { InlineLoader } from "@/components/ui/loader";
 
 interface SubmitButtonProps {
   children?: React.ReactNode;
@@ -17,7 +18,7 @@ export default function SubmitButton({
   const { pending } = useFormStatus();
   return (
     <Button type="submit" className={`${className}`} disabled={pending} {...props}>
-      {pending ? pendingText : children}
+      {pending ? <InlineLoader text={pendingText} /> : children}
     </Button>
   );
 }

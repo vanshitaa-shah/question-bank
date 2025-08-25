@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Question } from "@/types";
+import { InlineLoader } from "@/components/ui/loader";
 
 interface QuestionModalProps {
   isOpen: boolean;
@@ -144,7 +145,7 @@ export default function QuestionModal({
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? (mode === "edit" ? "Saving..." : "Adding...") : mode === "edit" ? "Save Changes" : "Add Question"}
+              {isPending ? <InlineLoader text={mode === "edit" ? "Saving..." : "Adding..."} /> : mode === "edit" ? "Save Changes" : "Add Question"}
             </Button>
           </DialogFooter>
         </form>

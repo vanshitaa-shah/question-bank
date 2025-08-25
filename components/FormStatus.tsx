@@ -3,7 +3,7 @@
 import React from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { InlineLoader } from "@/components/ui/loader";
 
 interface FormStatusButtonProps {
   readonly children: React.ReactNode;
@@ -39,10 +39,7 @@ export function FormStatusButton({
       {...props}
     >
       {pending ? (
-        <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          {loadingText || "Submitting..."}
-        </>
+        <InlineLoader text={loadingText || "Submitting..."} />
       ) : (
         children
       )}
@@ -69,15 +66,15 @@ export function FormStatusIndicator({
 
   return (
     <div className={`flex items-center gap-2 text-sm text-gray-600 ${className}`}>
-      <Loader2 className="w-4 h-4 animate-spin" />
-      {showText && (
-        <span>
-          {method === "POST" ? "Creating..." : 
-           method === "PUT" ? "Updating..." : 
-           method === "DELETE" ? "Deleting..." : 
-           "Processing..."}
-        </span>
-      )}
+      <InlineLoader 
+        text={showText ? (
+          method === "POST" ? "Creating..." : 
+          method === "PUT" ? "Updating..." : 
+          method === "DELETE" ? "Deleting..." : 
+          "Processing..."
+        ) : undefined}
+        showText={showText}
+      />
     </div>
   );
 }

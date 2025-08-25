@@ -1,6 +1,7 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { InlineLoader } from "@/components/ui/loader";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -46,14 +47,14 @@ export default function ConfirmDialog({
           </Button>
           <Button
             type="button"
-            variant="destructive"
+            variant="outline"
             onClick={() => {
               onOpenChange(false);
               onConfirm();
             }}
             disabled={loading}
           >
-            {loading ? "Deleting..." : confirmText}
+            {loading ? <InlineLoader text="Deleting..." /> : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

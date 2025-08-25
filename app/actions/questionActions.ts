@@ -5,12 +5,32 @@ import { Question, QuestionFormData, ActionState } from "@/types";
 import { connectDB } from "@/lib/db";
 import { Topic } from "@/models/topic";
 
+// Retry utility function
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000
+): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.error(`Attempt ${i + 1} failed:`, error);
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+    }
+  }
+  throw new Error("All retry attempts failed");
+}
+
 // Next.js 15: Enhanced caching with tags
 const getCachedQuestions = unstable_cache(
   async (topicId: string): Promise<readonly Question[]> => {
-    await connectDB();
-    const topic = await Topic.findById(topicId);
-    return JSON.parse(JSON.stringify(topic?.questions || []));
+    return withRetry(async () => {
+      await connectDB();
+      const topic = await Topic.findById(topicId).maxTimeMS(5000);
+      return JSON.parse(JSON.stringify(topic?.questions || []));
+    });
   },
   ["questions"],
   {
@@ -32,9 +52,9 @@ export async function addQuestion(
   topicId: string,
   questionData: QuestionFormData
 ): Promise<readonly Question[]> {
-  try {
+  return withRetry(async () => {
     await connectDB();
-    const topic = await Topic.findById(topicId);
+    const topic = await Topic.findById(topicId).maxTimeMS(5000);
     if (!topic) {
       throw new Error("Topic not found");
     }
@@ -74,10 +94,7 @@ export async function addQuestion(
     revalidatePath(`/questions/${topicId}`);
     
     return JSON.parse(JSON.stringify(topic.questions));
-  } catch (error) {
-    console.error("Failed to add question:", error);
-    throw error;
-  }
+  });
 }
 
 export async function updateQuestion(
@@ -85,9 +102,9 @@ export async function updateQuestion(
   questionId: string,
   updates: Partial<QuestionFormData>
 ): Promise<Question> {
-  try {
+  return withRetry(async () => {
     await connectDB();
-    const topic = await Topic.findById(topicId);
+    const topic = await Topic.findById(topicId).maxTimeMS(5000);
     if (!topic) {
       throw new Error("Topic not found");
     }
@@ -130,10 +147,7 @@ export async function updateQuestion(
     revalidatePath(`/questions/${topicId}`);
     
     return JSON.parse(JSON.stringify(question));
-  } catch (error) {
-    console.error("Failed to update question:", error);
-    throw error;
-  }
+  });
 }
 
 export async function deleteQuestion(
@@ -141,25 +155,27 @@ export async function deleteQuestion(
   questionId: string
 ): Promise<ActionState> {
   try {
-    await connectDB();
-    const topic = await Topic.findById(topicId);
-    if (!topic) {
-      return { success: false, error: "Topic not found" };
-    }
+    return await withRetry(async () => {
+      await connectDB();
+      const topic = await Topic.findById(topicId).maxTimeMS(5000);
+      if (!topic) {
+        return { success: false, error: "Topic not found" };
+      }
 
-    const question = topic.questions.id(questionId);
-    if (!question) {
-      return { success: false, error: "Question not found" };
-    }
+      const question = topic.questions.id(questionId);
+      if (!question) {
+        return { success: false, error: "Question not found" };
+      }
 
-    question.deleteOne();
-    await topic.save();
-    
-    // Next.js 15: Revalidate with tags
-    revalidateTag("questions");
-    revalidatePath(`/questions/${topicId}`);
-    
-    return { success: true, error: null };
+      question.deleteOne();
+      await topic.save();
+      
+      // Next.js 15: Revalidate with tags
+      revalidateTag("questions");
+      revalidatePath(`/questions/${topicId}`);
+      
+      return { success: true, error: null };
+    });
   } catch (error) {
     console.error("Failed to delete question:", error);
     return { 

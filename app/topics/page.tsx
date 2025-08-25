@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Metadata } from "next";
 import TopicsListServerWrapper from "@/components/Topics/TopicsListServerWrapper";
 import PageHeader from "@/components/PageHeader";
+import { CenteredLoader } from "@/components/ui/loader";
 
 export const metadata: Metadata = {
   title: "Topics | Question Bank",
@@ -33,7 +34,7 @@ export default function TopicsPage() {
         fallback={
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-              <h1>Loading</h1>
+              <CenteredLoader text="Loading topics..." />
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-32 w-full rounded-xl" />
               ))}

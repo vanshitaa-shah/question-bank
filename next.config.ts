@@ -42,19 +42,6 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Enhanced bundling
-  webpack: (config, { dev, isServer }) => {
-    // Optimize bundle in production
-    if (!dev && !isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        // Optimize React for production
-        'react/jsx-runtime': 'react/jsx-runtime.js',
-      };
-    }
-
-    return config;
-  },
 
   // Enhanced headers for better performance
   async headers() {
